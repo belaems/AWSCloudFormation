@@ -31,40 +31,40 @@ Apache.json → Versão simplificada apenas para demonstrar a instalação do Ap
 Vá até o console da AWS e abra o CloudFormation.
 
 Clique em Criar pilha → Com novos recursos (padrão).
-![alt text](image.png)
+![alt text](/Imagens/criarPilha.png)
 
 2. Upload do Template
 
 Escolha Carregar um arquivo de modelo. Nesse repositório há arquivos modelo de Apache e EC2 lembre se sempre usar o mesmo tipo de versão como json ou yaml
 
 Faça o upload do arquivo EC2.yaml (ou EC2.json).
-![alt text](image-1.png)
+![alt text](/Imagens/uploadEC2.png)
 
 3. Revisar Infraestrutura
 
 Após o upload, você pode:
 
 Visualizar graficamente no Designer do CloudFormation.
-![alt text](image-2.png)
-![alt text](image-3.png)
+![alt text](/Imagens/caminhoVisualizarGraficamente.png)
+![alt text](/Imagens/visualizarGraficamente.png)
 
 Editar manualmente arrastando os componentes.
 
 Alterar diretamente no código na aba Modelo.
-![alt text](image-4.png)
+![alt text](/Imagens/abaModelo.png)
 
 4. Configurar a Pilha
 
 Dê um nome para a pilha (exemplo: Ecommerce-Stack).
-![alt text](image-5.png)
+![alt text](/Imagens/configPilha.png)
 
 Selecione os parâmetros desejados (como tipo da instância EC2).
 
 Clique em Avançar até a tela de revisão.
 
 Confirme e clique em Criar pilha.
-![alt text](image-6.png)
-![alt text](image-7.png)
+![alt text](/Imagens/criarPilha.png)
+![alt text](/Imagens/pilhaCriada.png)
 
 5. Outputs da Pilha
 
