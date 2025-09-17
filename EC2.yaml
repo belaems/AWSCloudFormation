@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Template CloudFormation para criar uma instância EC2 para o e-commerce"
+
+Parameters:
+  KeyName:
+    Description: Nome do par de chaves SSH para acessar a instância
+    Type: AWS::EC2::KeyPair::KeyName
+
+  InstanceType:
+    Description: Tipo da instância EC2
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t2.micro
+      - t3.micro
+      - t3.small
+      - t3.medium
+    ConstraintDescription: deve ser um tipo de instância EC2 válido.
+
+  VpcId:
+    Description: VPC onde a instância será criada
+    Type: AWS::EC2::VPC::Id
+
+  SubnetId:
+    Description: Sub-rede dentro da VPC
+    Type: AWS::EC2::Subnet::Id
+
+Resources:
+  # Security Group permitindo HTTP e SSH
+  EcommerceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Permitir HTTP e SSH para instância do e-commerce
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0   # Atenção: aberto para todos, ideal restringir ao seu IP
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  # Instância EC2
+  EcommerceEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      ImageId: ami-08c40ec9ead489470 # Amazon Linux 2 AMI (us-east-1) → altere se usar outra região
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref EcommerceSecurityGroup
+      Tags:
+        - Key: Name
+          Value: Ecommerce-EC2
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          echo "<h1>Servidor do E-commerce rodando na EC2 🚀</h1>" > /var/www/html/index.html
+
+Outputs:
+  InstanceId:
+    Description: ID da instância EC2
+    Value: !Ref EcommerceEC2Instance
+
+  PublicIP:
+    Description: IP público da instância
+    Value: !GetAtt EcommerceEC2Instance.PublicIp
+
+  WebURL:
+    Description: URL HTTP para acessar a aplicação
+    Value: !Sub "http://${EcommerceEC2Instance.PublicDnsName}"
