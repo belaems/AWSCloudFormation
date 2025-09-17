@@ -1,25 +1,13 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Template CloudFormation para criar uma instância EC2 para o e-commerce",
+  "Description": "Template CloudFormation simplificado para criar uma instância EC2 de e-commerce (usando VPC default)",
   "Parameters": {
-    "KeyName": {
-      "Description": "Nome do par de chaves SSH para acessar a instância",
-      "Type": "AWS::EC2::KeyPair::KeyName"
-    },
     "InstanceType": {
       "Description": "Tipo da instância EC2",
       "Type": "String",
       "Default": "t3.micro",
       "AllowedValues": ["t2.micro", "t3.micro", "t3.small", "t3.medium"],
       "ConstraintDescription": "Deve ser um tipo válido de instância EC2."
-    },
-    "VpcId": {
-      "Description": "ID da VPC onde a instância será criada",
-      "Type": "AWS::EC2::VPC::Id"
-    },
-    "SubnetId": {
-      "Description": "ID da Sub-rede dentro da VPC",
-      "Type": "AWS::EC2::Subnet::Id"
     }
   },
   "Resources": {
@@ -27,7 +15,9 @@
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupDescription": "Permitir HTTP e SSH para instância do e-commerce",
-        "VpcId": { "Ref": "VpcId" },
+        "VpcId": {
+          "Fn::GetAtt": ["DefaultVPC", "VpcId"]
+        },
         "SecurityGroupIngress": [
           {
             "IpProtocol": "tcp",
@@ -44,17 +34,22 @@
         ]
       }
     },
+    "DefaultVPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsSupport": true,
+        "EnableDnsHostnames": true,
+        "Tags": [{ "Key": "Name", "Value": "DefaultVPC-Ecommerce" }]
+      }
+    },
     "EcommerceEC2Instance": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": { "Ref": "InstanceType" },
-        "KeyName": { "Ref": "KeyName" },
         "ImageId": "ami-08c40ec9ead489470",
-        "SubnetId": { "Ref": "SubnetId" },
         "SecurityGroupIds": [{ "Ref": "EcommerceSecurityGroup" }],
-        "Tags": [
-          { "Key": "Name", "Value": "Ecommerce-EC2" }
-        ],
+        "Tags": [{ "Key": "Name", "Value": "Ecommerce-EC2" }],
         "UserData": {
           "Fn::Base64": {
             "Fn::Sub": [
@@ -77,9 +72,7 @@
     },
     "WebURL": {
       "Description": "URL HTTP para acessar a aplicação",
-      "Value": {
-        "Fn::Sub": "http://${EcommerceEC2Instance.PublicDnsName}"
-      }
+      "Value": { "Fn::Sub": "http://${EcommerceEC2Instance.PublicDnsName}" }
     }
   }
 }
